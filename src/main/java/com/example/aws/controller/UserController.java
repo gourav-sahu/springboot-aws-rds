@@ -14,57 +14,45 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.aws.entity.User;
-import com.example.aws.exception.ResourceNotFoundException;
-import com.example.aws.repository.UserRepository;
+import com.example.aws.service.UserService;
 
 @RestController	
 @RequestMapping("/api")
 public class UserController {
 	
 	@Autowired
-	private UserRepository userRepo;
+	private UserService userService;
 	
 	//get all users
 	@GetMapping
 	public List<User> getAllUsers(){
-		return this.userRepo.findAll();
+		return userService.getAllUsers();
 	}
 	
 	//get user by id
 	@GetMapping("/{id}")
 	public User getUserById(@PathVariable (value = "id") long userId) {
-		return this.userRepo.findById(userId)
-				.orElseThrow(() -> new ResourceNotFoundException("User Not found with id "+ userId));
+		return userService.getUserById(userId);
 	}
 	
 	//create user
 	@PostMapping
 	public User createUser(@RequestBody User user) {
-		return this.userRepo.save(user);
+		return userService.createUser(user);
 	}
 	
 	//update user
 	@PutMapping("/{id}")
 	public User updateUser(@RequestBody User user, @PathVariable ("id") long userId) {
-		User existingUser =  this.userRepo.findById(userId)
-				.orElseThrow(() -> new ResourceNotFoundException("User Not found with id "+ userId));
 		
-		existingUser.setFirstName(user.getFirstName());
-		existingUser.setLastName(user.getLastName());
-		existingUser.setEmail(user.getEmail());
-		
-		return this.userRepo.save(existingUser);
+		return userService.updateUser(user, userId);
 	}
 	
 	//delete user by Id
 	@DeleteMapping("/{id}")
 	public ResponseEntity<User> deleteUser(@PathVariable ("id") long userId){
-		User existingUser =  this.userRepo.findById(userId)
-				.orElseThrow(() -> new ResourceNotFoundException("User Not found with id "+ userId));
 		
-		this.userRepo.delete(existingUser);
-		
-		return ResponseEntity.ok().build();
+		return userService.deleteUser(userId);
 	}
 
 }
